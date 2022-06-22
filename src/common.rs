@@ -1,18 +1,29 @@
-use afire::Request;
+use afire::{Content, Request, Response};
+use serde_json::json;
 
 pub enum ResponseType {
     Json,
-    Text
+    Text,
 }
 
 impl ResponseType {
-    pub fn fromHeaders(req: &Request) -> Self {
+    pub fn from_headers(req: &Request) -> Self {
         if let Some(i) = req.header("Accept") {
             if i == "text/plain" {
                 return ResponseType::Text;
             }
         }
-        
+
         ResponseType::Json
+    }
+}
+
+pub fn text_err_handle(err: &str, res_type: ResponseType) -> Response {
+    match res_type {
+        ResponseType::Text => Response::new().status(404).content(Content::TXT).text(err),
+        ResponseType::Json => Response::new()
+            .status(404)
+            .content(Content::JSON)
+            .text(json!({ "error": err })),
     }
 }

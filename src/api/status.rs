@@ -4,28 +4,25 @@ use afire::{Content, Method, Request, Response, Server};
 use rusqlite;
 use serde_json::json;
 
-use crate::{common::ResponseType, App};
+use crate::{
+    common::{text_err_handle, ResponseType},
+    App,
+};
 
 pub fn attach(server: &mut Server<App>) {
     server.stateful_route(Method::GET, "/{app}/status", |app, req| {
-        let res_type = ResponseType::fromHeaders(&req);
+        let res_type = ResponseType::from_headers(&req);
 
         match process(app, req) {
             Ok(i) => match res_type {
                 ResponseType::Text => Response::new()
                     .content(Content::TXT)
-                    .text(format!("{}, {}", i.0, i.1)),
+                    .text(format!("{},{}", i.0, i.1)),
                 ResponseType::Json => Response::new()
                     .content(Content::JSON)
                     .text(json!({ "version": i.0, "date": i.1 })),
             },
-            Err(e) => match res_type {
-                ResponseType::Text => Response::new().status(404).content(Content::TXT).text(e),
-                ResponseType::Json => Response::new()
-                    .status(404)
-                    .content(Content::JSON)
-                    .text(json!({"error": "No Versions"})),
-            },
+            Err(e) => text_err_handle(e, res_type),
         }
     });
 }
