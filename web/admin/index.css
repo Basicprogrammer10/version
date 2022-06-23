@@ -1,0 +1,15 @@
+[x-cloak] { display: none !important; }
+
+[cardBar] {
+  display: flex;
+  justify-content: space-between;
+}
+
+[iconHolder] {
+  display: flex;
+  align-items: center;
+}
+
+[iconHolder] span {
+  margin-right: 5px;
+}

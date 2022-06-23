@@ -18,12 +18,16 @@ impl ResponseType {
     }
 }
 
+pub fn json_err(err: &str) -> Response {
+    Response::new()
+        .status(404)
+        .content(Content::JSON)
+        .text(json!({ "error": err }))
+}
+
 pub fn text_err_handle(err: &str, res_type: ResponseType) -> Response {
     match res_type {
         ResponseType::Text => Response::new().status(404).content(Content::TXT).text(err),
-        ResponseType::Json => Response::new()
-            .status(404)
-            .content(Content::JSON)
-            .text(json!({ "error": err })),
+        ResponseType::Json => json_err(err),
     }
 }
