@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS versions (
     creationDate INTEGER NOT NULL,
     
     -- File
-    data BLOB,
+    file TEXT,
     accessCode TEXT
 )

@@ -1,10 +1,11 @@
+use std::fs;
 use std::{io::Read, sync::Arc};
 
 use afire::{Method, Request, Response, Server};
 use rusqlite::{DatabaseName, Error};
 
 use crate::{
-    common::{text_err_handle, ResponseType},
+    common::{json_err, text_err_handle, ResponseType},
     App,
 };
 
@@ -36,15 +37,24 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<u8>, &'a str> {
     };
 
     // Get file
-    let (row_id, access_code) = match db.query_row(
-        "SELECT ROWID, accessCode FROM versions WHERE version = ? AND uuid = ?",
+    let (file_id, access_code) = match db.query_row(
+        "SELECT file, accessCode FROM versions WHERE version = ? AND uuid = ?",
         [version, uuid],
-        |row| Ok((row.get::<_, u64>(0)?, row.get::<_, Option<String>>(1)?)),
+        |row| {
+            Ok((
+                row.get::<_, Option<String>>(0)?,
+                row.get::<_, Option<String>>(1)?,
+            ))
+        },
     ) {
         Ok(i) => i,
         Err(Error::QueryReturnedNoRows) => return Err("Version not found"),
         Err(e) => panic!("{}", e),
     };
+
+    if file_id.is_none() {
+        return Err("No file for version");
+    }
 
     // Verify access code
     if let Some(access_code) = access_code {
@@ -61,13 +71,6 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<u8>, &'a str> {
     }
 
     // Get file
-    let mut buff = Vec::new();
-    let mut blob = match db.blob_open(DatabaseName::Main, "versions", "data", row_id as i64, true)
-    {
-        Ok(i) => i,
-        Err(_) => return Err("No file for version"),
-    };
-    blob.read_to_end(&mut buff).unwrap();
-
+    let buff = fs::read(format!("data/files/{}", file_id.unwrap())).unwrap();
     Ok(buff)
 }

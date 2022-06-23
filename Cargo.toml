@@ -1,14 +1,14 @@
 [package]
+edition = "2021"
 name = "version"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
-afire = { git = "https://github.com/Basicprogrammer10/afire.git", branch = "dev", features = ["extensions", "tracing"] }
+afire = {git = "https://github.com/Basicprogrammer10/afire.git", branch = "dev", features = ["extensions", "tracing"]}
 parking_lot = "0.12.1"
-rusqlite = { version = "0.27.0", features = ["bundled", "blob"] }
+rusqlite = {version = "0.27.0", features = ["bundled", "blob"]}
 semver = "1.0.10"
 serde_json = "1.0.81"
 sha2 = "0.10.2"
 simple_config_parser = "1.0.0"
-uuid = "1.1.2"
+uuid = {version = "1.1.2", features = ["v4"]}
