@@ -19,7 +19,7 @@ pub fn attach(server: &mut Server<App>) {
                     "{},{},{}",
                     i.0,
                     i.2,
-                    i.1.replace("\r", "").replace("\n", "\\n")
+                    i.1.replace('\r', "").replace('\n', "\\n")
                 )),
                 ResponseType::Json => Response::new()
                     .content(Content::JSON)

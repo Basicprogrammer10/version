@@ -2,7 +2,6 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use afire::{Content, Method, Request, Response, Server};
-use rusqlite;
 use semver::{BuildMetadata, Prerelease, Version};
 use serde_json::json;
 
@@ -24,7 +23,7 @@ pub fn attach(server: &mut Server<App>) {
                                 "{},{},{}",
                                 x.0,
                                 x.2,
-                                x.1.replace("\r", "").replace("\n", "\\n")
+                                x.1.replace('\r', "").replace('\n', "\\n")
                             )
                         })
                         .collect::<Vec<String>>()

@@ -26,14 +26,17 @@
       <div class="content-wrapper content">
         <h1 class="content-title">Version System</h1>
 
-        <a href="#" class="btn">
+        <a href="/admin/new" class="btn">
           <div iconHolder>
             <ion-icon name="add-circle"></ion-icon>
             <span style="margin-left: 7px; margin-right: 0">New</span>
           </div>
         </a>
 
-        <div x-show="projects == null"><p>Loading</p></div>
+        <div x-show="projects == null">
+          <p>Loading</p>
+          <a href="#" x-on:click="projects = await init(true)">Login</a>
+        </div>
 
         <template x-for="i in projects">
           <div class="card w-400 mw-full" style="margin-left: 0">
@@ -54,7 +57,7 @@
                 ></span>
               </span>
 
-              <a href="#" class="btn">
+              <a :href="`/admin/edit/${i.name}`" class="btn">
                 <div iconHolder>
                   <ion-icon name="create"></ion-icon>
                   <span style="margin-left: 7px; margin-right: 0">Edit</span>

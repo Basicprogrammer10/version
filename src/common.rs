@@ -1,5 +1,6 @@
 use afire::{Content, Request, Response};
 use serde_json::json;
+use sha2::{Digest, Sha256};
 
 pub enum ResponseType {
     Json,
@@ -30,4 +31,23 @@ pub fn text_err_handle(err: &str, res_type: ResponseType) -> Response {
         ResponseType::Text => Response::new().status(404).content(Content::TXT).text(err),
         ResponseType::Json => json_err(err),
     }
+}
+
+pub fn verify_password(req: &Request, real_hash: &str) -> Option<Response> {
+    // Get password
+    let password = match req.header("password") {
+        Some(i) => i,
+        None => return Some(json_err("No password")),
+    };
+
+    // Check password
+    let mut hasher = Sha256::new();
+    hasher.update(password.as_bytes());
+    let hash = format!("{:x}", hasher.finalize());
+
+    if hash != real_hash {
+        return Some(json_err("Incorrect password"));
+    }
+
+    None
 }

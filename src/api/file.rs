@@ -47,20 +47,22 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<u8>, &'a str> {
     };
 
     // Verify access code
-    if access_code.is_some() && !access_code.as_ref().unwrap().is_empty() {
-        let access_attempt = match req.query.get("code") {
-            Some(i) => i,
-            None => return Err("No Access Code"),
-        };
+    if let Some(access_code) = access_code {
+        if !access_code.is_empty() {
+            let access_attempt = match req.query.get("code") {
+                Some(i) => i,
+                None => return Err("No Access Code"),
+            };
 
-        if access_attempt != access_code.unwrap() {
-            return Err("Invalid Access Code");
+            if access_attempt != access_code {
+                return Err("Invalid Access Code");
+            }
         }
     }
 
     // Get file
     let mut buff = Vec::new();
-    let mut blob = match db.blob_open(DatabaseName::Main, "versions", "data", row_id as i64, false)
+    let mut blob = match db.blob_open(DatabaseName::Main, "versions", "data", row_id as i64, true)
     {
         Ok(i) => i,
         Err(_) => return Err("No file for version"),

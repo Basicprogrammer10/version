@@ -1,26 +1,15 @@
 use afire::{Content, Method, Response, Server};
 use serde_json::json;
-use sha2::{Digest, Sha256};
 
-use crate::{common::json_err, App};
+use crate::{common::verify_password, App};
 
 pub fn attach(server: &mut Server<App>) {
     server.stateful_route(Method::GET, "/api/admin/home", |app, req| {
         let db = app.db.lock();
 
-        // Get password
-        let password = match req.header("password") {
-            Some(i) => i,
-            None => return json_err("No password"),
-        };
-
-        // Check password
-        let mut hasher = Sha256::new();
-        hasher.update(password.as_bytes().to_vec());
-        let hash = format!("{:x}", hasher.finalize());
-
-        if hash != app.cfg.admin_login {
-            return json_err("Incorrect password");
+        //  Verify password
+        if let Some(i) = verify_password(&req, &app.cfg.admin_login) {
+            return i;
         }
 
         let mut out = Vec::new();

@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use afire::{Content, Method, Request, Response, Server};
-use rusqlite;
 use serde_json::json;
 
 use crate::{
