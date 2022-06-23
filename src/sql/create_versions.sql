@@ -4,5 +4,8 @@ CREATE TABLE IF NOT EXISTS versions (
     version TEXT NOT NULL,
     changelog TEXT NOT NULL,
     creationDate INTEGER NOT NULL,
-    UNIQUE(versionId)
+    
+    -- File
+    data BLOB,
+    accessCode TEXT
 )

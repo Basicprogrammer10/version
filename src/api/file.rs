@@ -35,28 +35,18 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<u8>, &'a str> {
         Err(e) => panic!("{}", e),
     };
 
-    // Get version and changelog
-    let version_id = match db.query_row(
-        "SELECT versionId FROM versions WHERE version = ? AND uuid = ?",
+    // Get file
+    let (row_id, access_code) = match db.query_row(
+        "SELECT ROWID, accessCode FROM versions WHERE version = ? AND uuid = ?",
         [version, uuid],
-        |row| row.get::<_, String>(0),
+        |row| Ok((row.get::<_, u64>(0)?, row.get::<_, Option<String>>(1)?)),
     ) {
         Ok(i) => i,
         Err(Error::QueryReturnedNoRows) => return Err("Version not found"),
         Err(e) => panic!("{}", e),
     };
 
-    // Get file
-    let (row_id, access_code) = match db.query_row(
-        "SELECT ROWID, accessCode FROM files WHERE uuid = ?",
-        [version_id],
-        |row| Ok((row.get::<_, u64>(0)?, row.get::<_, Option<String>>(1)?)),
-    ) {
-        Ok(i) => i,
-        Err(Error::QueryReturnedNoRows) => return Err("File not found"),
-        Err(e) => panic!("{}", e),
-    };
-
+    // Verify access code
     if access_code.is_some() && !access_code.as_ref().unwrap().is_empty() {
         let access_attempt = match req.query.get("code") {
             Some(i) => i,
@@ -68,10 +58,13 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<u8>, &'a str> {
         }
     }
 
-    let mut blob = db
-        .blob_open(DatabaseName::Main, "files", "data", row_id as i64, false)
-        .unwrap();
+    // Get file
     let mut buff = Vec::new();
+    let mut blob = match db.blob_open(DatabaseName::Main, "versions", "data", row_id as i64, false)
+    {
+        Ok(i) => i,
+        Err(_) => return Err("No file for version"),
+    };
     blob.read_to_end(&mut buff).unwrap();
 
     Ok(buff)

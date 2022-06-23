@@ -37,7 +37,6 @@ impl App {
         // Init tables
         for i in [
             include_str!("./sql/create_apps.sql"),
-            include_str!("./sql/create_files.sql"),
             include_str!("./sql/create_versions.sql"),
         ] {
             trans.execute(i, []).unwrap();
