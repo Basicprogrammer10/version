@@ -10,7 +10,7 @@ use crate::{common::verify_password, App};
 pub fn attach(server: &mut Server<App>) {
     server.stateful_route(Method::POST, "/api/admin/new_app", |app, req| {
         // Verify Password
-        if let Some(i) = verify_password(&req, &&app.cfg.admin_login) {
+        if let Some(i) = verify_password(&req, &app.cfg.admin_login) {
             return i;
         }
 
@@ -19,7 +19,7 @@ pub fn attach(server: &mut Server<App>) {
         let app_name = body.get("name").unwrap().as_str().unwrap();
         let editing = body.get("editing").unwrap_or(&Value::Null).as_bool().unwrap_or(false);
         let uuid = if editing {
-            Uuid::from_str(&body.get("uuid").unwrap().as_str().unwrap()).unwrap().to_string()
+            Uuid::from_str(body.get("uuid").unwrap().as_str().unwrap()).unwrap().to_string()
         } else {
             Uuid::new_v4().to_string()
         };

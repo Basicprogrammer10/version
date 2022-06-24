@@ -8,7 +8,7 @@ use crate::{common::verify_password, App};
 pub fn attach(server: &mut Server<App>) {
     server.stateful_route(Method::POST, "/api/admin/new_version", |app, req| {
         // Verify Password
-        if let Some(i) = verify_password(&req, &&app.cfg.admin_login) {
+        if let Some(i) = verify_password(&req, &app.cfg.admin_login) {
             return i;
         }
 

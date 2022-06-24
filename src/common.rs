@@ -1,4 +1,4 @@
-use afire::{Content, Query, Request, Response};
+use afire::{Content, Request, Response};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 

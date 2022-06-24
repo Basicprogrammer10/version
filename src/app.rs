@@ -51,8 +51,7 @@ impl App {
 
 impl Default for App {
     fn default() -> Self {
-        // this is what i get for using afire beta
-        unsafe { std::mem::zeroed() }
+        unreachable!()
     }
 }
 
