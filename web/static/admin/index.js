@@ -65,7 +65,7 @@ async function sumbitFileUpdate(versionId) {
     id: versionId,
     password: getPassword(false),
   };
-  if (access != "") headers[access] = access;
+  if (access != "") headers.access = access;
 
   let res = await (
     await fetch("/api/admin/set_file", {
@@ -79,12 +79,12 @@ async function sumbitFileUpdate(versionId) {
   location.hash = "";
 }
 
-async function submitNewVersion(app) {
+async function submitNewVersion(app, editing) {
   let version = document.querySelector("#new-version");
   let changelog = document.querySelector("#new-changelog");
 
   let res = await (
-    await fetch("/api/admin/new_version", {
+    await fetch(`/api/admin/new_version`, {
       method: "POST",
       headers: {
         password: getPassword(false),
@@ -93,6 +93,7 @@ async function submitNewVersion(app) {
         app,
         version: version.value,
         changelog: changelog.value,
+        edit: editing,
       }),
     })
   ).json();

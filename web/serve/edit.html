@@ -20,7 +20,7 @@
   </head>
   <body
     class="dark-mode"
-    x-data="{data: null, modalIndex: null}"
+    x-data="{data: null, modalIndex: null, editing: false}"
     x-init="data = await initEdit()"
   >
     <template x-if="data != null && modalIndex != null">
@@ -95,13 +95,15 @@
     >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
-          <h2 class="card-title">New Version</h2>
+          <h2 class="card-title" x-show="!editing">New Version</h2>
+          <h2 class="card-title" x-show="editing">Edit Version</h2>
 
           <input
             type="text"
             class="form-control"
             placeholder="Version"
             id="new-version"
+            :value="if (editing) return data.versions[modalIndex].version"
           />
           <br />
 
@@ -109,6 +111,7 @@
             class="form-control"
             placeholder="Changelog"
             id="new-changelog"
+            :value="if (editing) return data.versions[modalIndex].changelog"
           ></textarea>
           <br />
 
@@ -119,8 +122,8 @@
             </div>
           </a>
           <a
-            href="#file"
-            @click="await submitNewVersion(data.name);data = await initEdit()"
+            href="#new"
+            @click="await submitNewVersion(data.name, editing);data = await initEdit()"
             class="btn"
           >
             <div iconHolder>
@@ -138,34 +141,50 @@
 
         <template x-if="data != null">
           <div>
-            <h1
-              class="content-title"
-              x-text="data.name"
-              style="display: inline"
-            ></h1>
-            <code
-              style="margin-bottom: 2rem; display: inline-block"
-              x-text="data.version"
-            ></code>
-            <br />
+            <span>
+              <h1
+                class="content-title"
+                x-text="data.name"
+                style="display: inline"
+              ></h1>
+              <code
+                style="margin-bottom: 2rem; display: inline-block"
+                x-text="data.version"
+              ></code>
+            </span>
 
-            <a href="/admin" class="btn">
-              <div iconHolder>
-                <ion-icon name="home"></ion-icon>
-                <span style="margin-left: 7px; margin-right: 0">Home</span>
-              </div>
-            </a>
-            <a href="#new" class="btn">
-              <div iconHolder>
-                <ion-icon name="add-circle"></ion-icon>
-                <span style="margin-left: 7px; margin-right: 0"
-                  >New Version</span
-                >
-              </div>
-            </a>
+            <span style="display: flex; gap: 5px; margin-top: 1rem">
+              <a href="/admin" class="btn">
+                <div iconHolder>
+                  <ion-icon name="home"></ion-icon>
+                  <span style="margin-left: 7px; margin-right: 0">Home</span>
+                </div>
+              </a>
+              <a href="#new" class="btn" @click="editing=false">
+                <div iconHolder>
+                  <ion-icon name="add-circle"></ion-icon>
+                  <span style="margin-left: 7px; margin-right: 0"
+                    >New Version</span
+                  >
+                </div>
+              </a>
+              <a
+                href="#"
+                class="btn"
+                x-show="data.version != null"
+                @click="await setLatest(data.name, null);data = await initEdit()"
+              >
+                <div iconHolder>
+                  <ion-icon name="star"></ion-icon>
+                  <span style="margin-left: 7px; margin-right: 0"
+                    >Remove Latest</span
+                  >
+                </div>
+              </a>
+            </span>
 
             <template x-for="(i, index) in data.versions">
-              <div class="card w-400 mw-full" style="margin-left: 0">
+              <div class="card w-500 mw-full" style="margin-left: 0">
                 <h2
                   class="card-title"
                   style="display: inline"
@@ -191,7 +210,7 @@
                     ></span>
                   </span>
 
-                  <span>
+                  <span style="display: flex; gap: 5px">
                     <a
                       href="#"
                       @click="await setLatest(data.name, i.id);data = await initEdit()"
@@ -199,6 +218,18 @@
                       x-show="i.version != data.version"
                     >
                       <ion-icon name="star"></ion-icon>
+                    </a>
+                    <a
+                      href="#new"
+                      @click="editing=true;modalIndex=index"
+                      class="btn"
+                    >
+                      <div iconHolder>
+                        <ion-icon name="pencil"></ion-icon>
+                        <span style="margin-left: 7px; margin-right: 0"
+                          >Edit</span
+                        >
+                      </div>
                     </a>
                     <a href="#file" @click="modalIndex = index" class="btn">
                       <div iconHolder>

@@ -29,7 +29,7 @@ pub fn attach(server: &mut Server<App>) {
 
         // Get app versions
         let mut versions = Vec::new();
-        let mut final_latest_version = "0.0.0".to_owned();
+        let mut final_latest_version = None;
 
         let mut querry = db
             .prepare("SELECT file, version, versionId, changelog, creationDate, accessCode FROM versions WHERE uuid = ?")
@@ -46,7 +46,7 @@ pub fn attach(server: &mut Server<App>) {
                 );
 
             if Some(version_id.to_owned()) == latest_version {
-                final_latest_version = version.to_owned();
+                final_latest_version = Some(version.clone());
             }
 
             versions.push(json!({"version": version, "id": version_id, "changelog": changelog, "date": creation_data, "access": access_code, "file": file}));

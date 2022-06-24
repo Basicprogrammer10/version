@@ -17,6 +17,11 @@ pub fn attach(server: &mut Server<App>) {
         let app_name = body.get("app").unwrap().as_str().unwrap();
         let version = body.get("version").unwrap().as_str().unwrap();
         let changelog = body.get("changelog").unwrap().as_str().unwrap();
+        let editing = body
+            .get("edit")
+            .unwrap_or(&Value::Bool(false))
+            .as_bool()
+            .unwrap();
 
         let version_id = Uuid::new_v4().to_string();
 
@@ -24,7 +29,11 @@ pub fn attach(server: &mut Server<App>) {
         app.db
             .lock()
             .execute(
-                include_str!("../../sql/execute_new_version.sql"),
+                if editing {
+                    include_str!("../../sql/execute_update_version.sql")
+                } else {
+                    include_str!("../../sql/execute_new_version.sql")
+                },
                 params![app_name, version_id, version, changelog],
             )
             .unwrap();

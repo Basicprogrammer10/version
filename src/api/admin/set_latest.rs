@@ -17,22 +17,25 @@ pub fn attach(server: &mut Server<App>) {
 
         // Get data
         let body = serde_json::from_str::<Value>(&req.body_string().unwrap()).unwrap();
-        let app_name = body.get("app").unwrap().as_str().unwrap();
-        let version = Uuid::parse_str(body.get("version").unwrap().as_str().unwrap())
+        let version = body
+            .get("version")
             .unwrap()
-            .to_string();
+            .as_str()
+            .map(|x| Uuid::parse_str(x).unwrap().to_string());
+        let app_name = body.get("app").unwrap().as_str().unwrap();
 
         // Update Database
-        if app
-            .db
-            .lock()
-            .query_row(
-                "SELECT Count(*) FROM versions WHERE versionId = ?",
-                [&version],
-                |row| row.get::<_, u64>(0),
-            )
-            .unwrap()
-            < 1
+        if version.is_some()
+            && app
+                .db
+                .lock()
+                .query_row(
+                    "SELECT Count(*) FROM versions WHERE versionId = ?",
+                    [&version],
+                    |row| row.get::<_, u64>(0),
+                )
+                .unwrap()
+                < 1
         {
             return json_err("Invalid version");
         }
