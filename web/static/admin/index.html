@@ -22,11 +22,55 @@
     x-data="{projects: null}"
     x-init="projects = await init()"
   >
+    <div
+      data-overlay-dismissal-disabled="true"
+      data-esc-dismissal-disabled="true"
+      class="modal"
+      id="new"
+      tabindex="-1"
+      role="dialog"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <h2 class="card-title">New App</h2>
+
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Name"
+            id="new-app"
+          />
+          <br />
+
+          <a href="#" class="btn">
+            <div iconHolder>
+              <ion-icon name="arrow-back"></ion-icon>
+              <span style="margin-left: 7px; margin-right: 0">Back</span>
+            </div>
+          </a>
+          <a
+            href="#new"
+            @click="await submitNewApp();projects = await init()"
+            class="btn"
+          >
+            <div iconHolder>
+              <ion-icon name="save"></ion-icon>
+              <span style="margin-left: 7px; margin-right: 0">Save</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <div class="page-wrapper">
       <div class="content-wrapper content">
-        <h1 class="content-title">Version System</h1>
+        <h1 class="content-title" style="display: inline-block">
+          Version System
+        </h1>
+        <code>1.0.0</code>
+        <br />
 
-        <a href="/admin/new" class="btn">
+        <a href="#new" class="btn">
           <div iconHolder>
             <ion-icon name="add-circle"></ion-icon>
             <span style="margin-left: 7px; margin-right: 0">New</span>

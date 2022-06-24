@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS apps (
     uuid TEXT NOT NULL,
     name TEXT NOT NULL,
-    latestVersion,
+    latestVersion TEXT,
     creationDate INTEGER NOT NULL,
     UNIQUE(uuid)
 )

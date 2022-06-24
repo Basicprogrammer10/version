@@ -120,6 +120,26 @@ async function setLatest(app, id) {
   if ("error" in res) return alert(`Error: ${res.error}`);
 }
 
+async function submitNewApp() {
+  let name = document.querySelector("#new-app");
+
+  let res = await (
+    await fetch("/api/admin/new_app", {
+      method: "POST",
+      headers: {
+        password: getPassword(false),
+      },
+      body: JSON.stringify({
+        name: name.value,
+      }),
+    })
+  ).json();
+
+  if ("error" in res) return alert(`Error: ${res.error}`);
+  location.hash = "";
+  name.value = "";
+}
+
 function asyncFileReader(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();

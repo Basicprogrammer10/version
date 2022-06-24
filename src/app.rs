@@ -17,7 +17,6 @@ pub struct Config {
     pub database: String,
 
     // Admin
-    pub admin_page: String,
     pub admin_login: String,
 }
 
@@ -68,7 +67,6 @@ impl Config {
             database: cfg.get("database").unwrap(),
 
             // Admin
-            admin_page: cfg.get("page").unwrap(),
             admin_login: cfg.get("login").unwrap(),
         }
     }

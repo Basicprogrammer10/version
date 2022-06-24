@@ -16,17 +16,17 @@ pub fn attach(server: &mut Server<App>) {
 
         // Get data from db
         let mut querry = db
-            .prepare("SELECT name, uuid, latestVersion FROM apps")
+            .prepare("SELECT name, uuid, latestVersion, creationDate FROM apps")
             .unwrap();
         let mut rows = querry.query([]).unwrap();
         while let Some(i) = rows.next().unwrap() {
             let mut final_latest_version = "0.0.0".to_owned();
             let mut final_version_count = 0;
-            let mut final_recent_update = 0;
-            let (name, uuid, latest_version) = (
+            let (name, uuid, latest_version, mut final_recent_update) = (
                 i.get::<_, String>(0).unwrap(),
                 i.get::<_, String>(1).unwrap(),
-                i.get::<_, String>(2).unwrap(),
+                i.get::<_, Option<String>>(2).unwrap(),
+                i.get::<_, u64>(3).unwrap(),
             );
 
             let mut querry = db
@@ -43,13 +43,14 @@ pub fn attach(server: &mut Server<App>) {
                 final_recent_update = final_recent_update.max(creation_date);
 
                 final_version_count += 1;
-                if version_id == latest_version {
+                if Some(version_id) == latest_version {
                     final_latest_version = version.to_owned();
                 }
             }
 
             out.push(json!({"name": name, "version": final_latest_version, "versions": final_version_count, "recentUpdate": final_recent_update}));
         }
+        out.reverse();
 
         Response::new().content(Content::JSON).text(json!(out))
     })
