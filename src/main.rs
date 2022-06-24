@@ -3,7 +3,7 @@ use std::path::Path;
 
 use afire::{
     extension::{Logger, ServeStatic},
-    Error, Middleware, Response, Server,
+    Middleware, Response, Server,
 };
 use serde_json::json;
 
