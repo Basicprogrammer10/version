@@ -32,24 +32,23 @@ pub fn attach(server: &mut Server<App>) {
         let mut final_latest_version = None;
 
         let mut querry = db
-            .prepare("SELECT file, version, versionId, changelog, creationDate, accessCode FROM versions WHERE uuid = ?")
+            .prepare("SELECT file, version, versionId, changelog, creationDate FROM versions WHERE uuid = ?")
             .unwrap();
         let mut rows = querry.query([uuid]).unwrap();
         while let Some(i) = rows.next().unwrap() {
-            let (file, version, version_id, changelog, creation_data, access_code) = (
+            let (file, version, version_id, changelog, creation_data) = (
                     i.get::<_, Option<String>>(0).unwrap().is_some(),
                     i.get::<_, String>(1).unwrap(),
                     i.get::<_, String>(2).unwrap(),
                     i.get::<_, String>(3).unwrap(),
                     i.get::<_, u64>(4).unwrap(),
-                    i.get::<_, Option<String>>(5).unwrap(),
                 );
 
             if Some(version_id.to_owned()) == latest_version {
                 final_latest_version = Some(version.clone());
             }
 
-            versions.push(json!({"version": version, "id": version_id, "changelog": changelog, "date": creation_data, "access": access_code, "file": file}));
+            versions.push(json!({"version": version, "id": version_id, "changelog": changelog, "date": creation_data, "file": file}));
         }
         versions.reverse();
 

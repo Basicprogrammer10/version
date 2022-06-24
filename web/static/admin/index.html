@@ -19,48 +19,63 @@
   </head>
   <body
     class="dark-mode"
-    x-data="{projects: null}"
+    x-data="{projects: null, editing: null}"
     x-init="projects = await init()"
   >
-    <div
-      data-overlay-dismissal-disabled="true"
-      data-esc-dismissal-disabled="true"
-      class="modal"
-      id="new"
-      tabindex="-1"
-      role="dialog"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <h2 class="card-title">New App</h2>
+    <template x-if="projects != null">
+      <div
+        data-overlay-dismissal-disabled="true"
+        data-esc-dismissal-disabled="true"
+        class="modal"
+        id="new"
+        tabindex="-1"
+        role="dialog"
+      >
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <h2
+              class="card-title"
+              x-text="`${editing != null ? 'Edit': 'New'} App`"
+            ></h2>
 
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Name"
-            id="new-app"
-          />
-          <br />
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Name"
+              id="new-app"
+              :value="if (editing != null) return projects[editing].name"
+            />
+            <br />
 
-          <a href="#" class="btn">
-            <div iconHolder>
-              <ion-icon name="arrow-back"></ion-icon>
-              <span style="margin-left: 7px; margin-right: 0">Back</span>
-            </div>
-          </a>
-          <a
-            href="#new"
-            @click="await submitNewApp();projects = await init()"
-            class="btn"
-          >
-            <div iconHolder>
-              <ion-icon name="save"></ion-icon>
-              <span style="margin-left: 7px; margin-right: 0">Save</span>
-            </div>
-          </a>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Access code"
+              id="access-code"
+              :value="if (editing != null) return projects[editing].access"
+            />
+            <br />
+
+            <a href="#" class="btn">
+              <div iconHolder>
+                <ion-icon name="arrow-back"></ion-icon>
+                <span style="margin-left: 7px; margin-right: 0">Back</span>
+              </div>
+            </a>
+            <a
+              href="#new"
+              @click="await submitNewApp(editing != null ? projects[editing].uuid: false);projects = await init()"
+              class="btn"
+            >
+              <div iconHolder>
+                <ion-icon name="save"></ion-icon>
+                <span style="margin-left: 7px; margin-right: 0">Save</span>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
     <div class="page-wrapper">
       <div class="content-wrapper content">
@@ -70,7 +85,7 @@
         <code>1.0.0</code>
         <br />
 
-        <a href="#new" class="btn">
+        <a href="#new" class="btn" @click="editing = null">
           <div iconHolder>
             <ion-icon name="add-circle"></ion-icon>
             <span style="margin-left: 7px; margin-right: 0">New</span>
@@ -82,8 +97,8 @@
           <a href="#" x-on:click="projects = await init(true)">Login</a>
         </div>
 
-        <template x-for="i in projects">
-          <div class="card w-400 mw-full" style="margin-left: 0">
+        <template x-for="(i, index) in projects">
+          <div class="card w-500 mw-full" style="margin-left: 0">
             <h2 class="card-title" style="display: inline" x-text="i.name"></h2>
             <code
               style="margin-bottom: 2rem; display: inline-block"
@@ -101,12 +116,22 @@
                 ></span>
               </span>
 
-              <a :href="`/admin/edit/${i.name}`" class="btn">
-                <div iconHolder>
-                  <ion-icon name="create"></ion-icon>
-                  <span style="margin-left: 7px; margin-right: 0">Edit</span>
-                </div>
-              </a>
+              <span>
+                <a href="#new" class="btn" @click="editing=index">
+                  <div iconHolder>
+                    <ion-icon name="create"></ion-icon>
+                    <span style="margin-left: 7px; margin-right: 0">Edit</span>
+                  </div>
+                </a>
+                <a :href="`/admin/edit/${i.name}`" class="btn">
+                  <div iconHolder>
+                    <ion-icon name="invert-mode"></ion-icon>
+                    <span style="margin-left: 7px; margin-right: 0"
+                      >Versions</span
+                    >
+                  </div>
+                </a>
+              </span>
             </div>
           </div>
         </template>

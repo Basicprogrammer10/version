@@ -4,7 +4,5 @@ CREATE TABLE IF NOT EXISTS versions (
     version TEXT NOT NULL UNIQUE,
     changelog TEXT NOT NULL,
     creationDate INTEGER NOT NULL,
-    -- File
-    file TEXT,
-    accessCode TEXT
+    file TEXT
 )

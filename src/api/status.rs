@@ -4,7 +4,7 @@ use afire::{Content, Method, Request, Response, Server};
 use serde_json::json;
 
 use crate::{
-    common::{text_err_handle, ResponseType},
+    common::{text_err_handle, verify_access, ResponseType},
     App,
 };
 
@@ -31,18 +31,25 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<(String, u64), &'a str> {
     let app_name = req.path_param("app").unwrap();
 
     // Get versions
-    let latest_version = match app.db.lock().query_row(
-        "SELECT latestVersion FROM apps WHERE name = ?",
+    let (latest_version, access_code) = match app.db.lock().query_row(
+        "SELECT latestVersion, accessCode FROM apps WHERE name = ?",
         [app_name],
-        |row| row.get::<_, Option<String>>(0),
+        |row| {
+            Ok((
+                row.get::<_, Option<String>>(0)?,
+                row.get::<_, Option<String>>(1)?,
+            ))
+        },
     ) {
         Ok(i) => match i {
-            Some(i) => i,
-            None => return Err("No app versions found"),
+            (Some(i), j) => (i, j),
+            (None, _) => return Err("No app versions found"),
         },
         Err(rusqlite::Error::QueryReturnedNoRows) => return Err("App not found"),
         Err(e) => panic!("{}", e),
     };
+
+    verify_access(&req, access_code)?;
 
     // Get version and changelog
     let out = app

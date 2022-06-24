@@ -1,4 +1,6 @@
-use afire::{Content, Method, Response, Server};
+use std::str::FromStr;
+
+use afire::{internal::common::decode_url, Content, Method, Response, Server};
 use rusqlite::params;
 use serde_json::{self, json, Value};
 use uuid::Uuid;
@@ -15,15 +17,28 @@ pub fn attach(server: &mut Server<App>) {
         // Get data
         let body = serde_json::from_str::<Value>(&req.body_string().unwrap()).unwrap();
         let app_name = body.get("name").unwrap().as_str().unwrap();
-
-        let uuid = Uuid::new_v4();
+        let editing = body.get("editing").unwrap_or(&Value::Null).as_bool().unwrap_or(false);
+        let uuid = if editing {
+            Uuid::from_str(&body.get("uuid").unwrap().as_str().unwrap()).unwrap().to_string()
+        } else {
+            Uuid::new_v4().to_string()
+        };
+        let access = body
+            .get("access")
+            .unwrap_or(&Value::Null)
+            .as_str()
+            .map(|x| decode_url(x.to_string()));
 
         // Update Database
         app.db
             .lock()
             .execute(
-                "INSERT INTO apps (uuid, name, creationDate) VALUES (?, ?, strftime('%s', 'now'))",
-                params![uuid.to_string(), app_name],
+                if editing {
+                    "UPDATE apps SET name = ?2, accessCode = ?3 WHERE uuid = ?1"
+                } else {
+                    "INSERT INTO apps (uuid, name, accessCode, creationDate) VALUES (?, ?, ?, strftime('%s', 'now'))"
+                },
+                params![uuid, app_name, access],
             )
             .unwrap();
         // Send response

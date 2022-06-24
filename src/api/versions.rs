@@ -6,7 +6,7 @@ use semver::{BuildMetadata, Prerelease, Version};
 use serde_json::json;
 
 use crate::{
-    common::{text_err_handle, ResponseType},
+    common::{text_err_handle, verify_access, ResponseType},
     App,
 };
 
@@ -46,13 +46,17 @@ fn process<'a>(app: Arc<App>, req: Request) -> Result<Vec<(String, String, u64)>
     let app_name = req.path_param("app").unwrap();
 
     // Get app UUID
-    let uuid = match db.query_row("SELECT uuid FROM apps WHERE name = ?", [app_name], |row| {
-        row.get::<_, String>(0)
-    }) {
+    let (uuid, access_code) = match db.query_row(
+        "SELECT uuid, accessCode FROM apps WHERE name = ?",
+        [app_name],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+    ) {
         Ok(i) => i,
         Err(rusqlite::Error::QueryReturnedNoRows) => return Err("App not found"),
         Err(e) => panic!("{}", e),
     };
+
+    verify_access(&req, access_code)?;
 
     // Get all versions from app
     let mut query = db

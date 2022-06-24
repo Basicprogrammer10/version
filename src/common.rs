@@ -1,4 +1,4 @@
-use afire::{Content, Request, Response};
+use afire::{Content, Query, Request, Response};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 
@@ -50,4 +50,20 @@ pub fn verify_password(req: &Request, real_hash: &str) -> Option<Response> {
     }
 
     None
+}
+
+pub fn verify_access<'b>(req: &Request, access: Option<String>) -> Result<(), &'b str> {
+    if let Some(access) = access {
+        if !access.is_empty() {
+            let access_attempt = match req.query.get("code") {
+                Some(i) => i,
+                None => return Err("No Access Code"),
+            };
+
+            if access_attempt != access {
+                return Err("Invalid Access Code");
+            }
+        }
+    }
+    Ok(())
 }

@@ -2,10 +2,10 @@ use afire::Server;
 
 use crate::App;
 
+mod admin;
 mod file;
 mod status;
 mod version;
-mod admin;
 mod versions;
 
 pub fn attach(server: &mut Server<App>) {

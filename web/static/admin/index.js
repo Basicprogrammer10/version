@@ -54,24 +54,20 @@ async function initEdit() {
 }
 
 async function sumbitFileUpdate(versionId) {
-  let access = document.querySelector("#access-code").value;
   let bytes = new Uint8Array(0);
   try {
     let file = document.querySelector("#file-input-1").files[0];
     bytes = new Uint8Array(await asyncFileReader(file));
   } catch (e) {}
 
-  let headers = {
-    id: versionId,
-    password: getPassword(false),
-  };
-  if (access != "") headers.access = access;
-
   let res = await (
     await fetch("/api/admin/set_file", {
       method: "POST",
       body: bytes,
-      headers,
+      headers: {
+        id: versionId,
+        password: getPassword(false),
+      },
     })
   ).json();
 
@@ -121,8 +117,16 @@ async function setLatest(app, id) {
   if ("error" in res) return alert(`Error: ${res.error}`);
 }
 
-async function submitNewApp() {
+async function submitNewApp(uuid) {
+  let access = document.querySelector("#access-code");
   let name = document.querySelector("#new-app");
+
+  let body = {
+    name: name.value,
+    editing: uuid != null,
+  };
+  if (access.value != "") body.access = access.value;
+  if (body.editing) body.uuid = uuid;
 
   let res = await (
     await fetch("/api/admin/new_app", {
@@ -130,15 +134,14 @@ async function submitNewApp() {
       headers: {
         password: getPassword(false),
       },
-      body: JSON.stringify({
-        name: name.value,
-      }),
+      body: JSON.stringify(body),
     })
   ).json();
 
   if ("error" in res) return alert(`Error: ${res.error}`);
   location.hash = "";
   name.value = "";
+  access.value = "";
 }
 
 function asyncFileReader(file) {

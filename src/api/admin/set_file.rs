@@ -1,7 +1,7 @@
 use std::fs;
 use std::str::FromStr;
 
-use afire::{internal::common::decode_url, Content, Method, Response, Server};
+use afire::{Content, Method, Response, Server};
 use rusqlite::params;
 use serde_json::json;
 use uuid::Uuid;
@@ -20,7 +20,6 @@ pub fn attach(server: &mut Server<App>) {
 
         // Get headers
         let new_file = !req.body.is_empty();
-        let access = req.header("access").map(decode_url);
         let version_id = match req.header("id") {
             Some(i) => match Uuid::from_str(&i) {
                 Ok(i) => i,
@@ -29,15 +28,6 @@ pub fn attach(server: &mut Server<App>) {
             None => return json_err("No version ID"),
         }
         .to_string();
-
-        // Update access code
-        app.db
-            .lock()
-            .execute(
-                "UPDATE versions SET accessCode = ? WHERE versionId = ?",
-                params![access, version_id],
-            )
-            .unwrap();
 
         // Update data
         let file_path = app

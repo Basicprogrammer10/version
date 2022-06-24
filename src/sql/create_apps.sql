@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS apps (
     name TEXT NOT NULL,
     latestVersion TEXT,
     creationDate INTEGER NOT NULL,
+    accessCode TEXT,
     UNIQUE(uuid)
 )
