@@ -64,7 +64,7 @@
             </a>
             <a
               href="#new"
-              @click="await submitNewApp(editing != null ? projects[editing].uuid: false);projects = await init()"
+              @click="await submitNewApp(editing != null ? projects[editing].uuid: null);projects = await init()"
               class="btn"
             >
               <div iconHolder>

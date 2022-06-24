@@ -3,14 +3,17 @@ use std::path::Path;
 
 use afire::{
     extension::{Logger, ServeStatic},
-    Middleware, Server,
+    Error, Middleware, Response, Server,
 };
+use serde_json::json;
 
 mod api;
 mod app;
 mod common;
 mod r#static;
 use app::App;
+
+use crate::common::ResponseType;
 
 fn main() {
     // Make filr dir
@@ -23,6 +26,16 @@ fn main() {
 
     api::attach(&mut server);
     r#static::attach(&mut server);
+
+    server.error_handler(|req, err| match req {
+        Ok(i) => {
+            return match ResponseType::from_headers(&i) {
+                ResponseType::Text => Response::new().status(500).text(err),
+                ResponseType::Json => Response::new().status(500).text(json!({ "error": err })),
+            }
+        }
+        Err(_) => Response::new(),
+    });
 
     server.start().unwrap();
 }
