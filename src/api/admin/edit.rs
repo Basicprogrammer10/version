@@ -1,5 +1,4 @@
 use afire::{Content, Method, Response, Server};
-use rusqlite::DatabaseName;
 use serde_json::json;
 
 use crate::{
@@ -33,12 +32,12 @@ pub fn attach(server: &mut Server<App>) {
         let mut final_latest_version = "0.0.0".to_owned();
 
         let mut querry = db
-            .prepare("SELECT ROWID, version, versionId, changelog, creationDate, accessCode FROM versions WHERE uuid = ?")
+            .prepare("SELECT file, version, versionId, changelog, creationDate, accessCode FROM versions WHERE uuid = ?")
             .unwrap();
         let mut rows = querry.query([uuid]).unwrap();
         while let Some(i) = rows.next().unwrap() {
-            let (row_id, version, version_id, changelog, creation_data, access_code) = (
-                    i.get::<_, u64>(0).unwrap(),
+            let (file, version, version_id, changelog, creation_data, access_code) = (
+                    i.get::<_, Option<String>>(0).unwrap().is_some(),
                     i.get::<_, String>(1).unwrap(),
                     i.get::<_, String>(2).unwrap(),
                     i.get::<_, String>(3).unwrap(),
@@ -50,9 +49,7 @@ pub fn attach(server: &mut Server<App>) {
                 final_latest_version = version.to_owned();
             }
 
-            let blob = db.blob_open(DatabaseName::Main, "versions", "data", row_id as i64, false).is_ok();
-
-            versions.push(json!({"version": version, "id": version_id, "changelog": changelog, "date": creation_data, "access": access_code, "file": blob}));
+            versions.push(json!({"version": version, "id": version_id, "changelog": changelog, "date": creation_data, "access": access_code, "file": file}));
         }
         versions.reverse();
 

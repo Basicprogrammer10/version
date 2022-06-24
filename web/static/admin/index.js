@@ -55,9 +55,69 @@ async function initEdit() {
 
 async function sumbitFileUpdate(versionId) {
   let access = document.querySelector("#access-code").value;
-  let file = document.querySelector("#file-input-1").files[0];
-  let bytes = new Uint8Array(await asyncFileReader(file));
-  console.log(bytes);
+  let bytes = new Uint8Array(0);
+  try {
+    let file = document.querySelector("#file-input-1").files[0];
+    bytes = new Uint8Array(await asyncFileReader(file));
+  } catch (e) {}
+
+  let headers = {
+    id: versionId,
+    password: getPassword(false),
+  };
+  if (access != "") headers[access] = access;
+
+  let res = await (
+    await fetch("/api/admin/set_file", {
+      method: "POST",
+      body: bytes,
+      headers,
+    })
+  ).json();
+
+  if ("error" in res) return alert(`Error: ${res.error}`);
+  location.hash = "";
+}
+
+async function submitNewVersion(app) {
+  let version = document.querySelector("#new-version");
+  let changelog = document.querySelector("#new-changelog");
+
+  let res = await (
+    await fetch("/api/admin/new_version", {
+      method: "POST",
+      headers: {
+        password: getPassword(false),
+      },
+      body: JSON.stringify({
+        app,
+        version: version.value,
+        changelog: changelog.value,
+      }),
+    })
+  ).json();
+
+  if ("error" in res) return alert(`Error: ${res.error}`);
+  location.hash = "";
+  version.value = "";
+  changelog.value = "";
+}
+
+async function setLatest(app, id) {
+  let res = await (
+    await fetch("/api/admin/set_latest", {
+      method: "POST",
+      headers: {
+        password: getPassword(false),
+      },
+      body: JSON.stringify({
+        app,
+        version: id,
+      }),
+    })
+  ).json();
+
+  if ("error" in res) return alert(`Error: ${res.error}`);
 }
 
 function asyncFileReader(file) {
