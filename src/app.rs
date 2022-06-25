@@ -49,12 +49,6 @@ impl App {
     }
 }
 
-impl Default for App {
-    fn default() -> Self {
-        unreachable!()
-    }
-}
-
 impl Config {
     fn load<T: AsRef<Path>>(file: T) -> Self {
         let cfg = Cfg::new().file(file).unwrap();

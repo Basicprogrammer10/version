@@ -4,7 +4,7 @@ name = "version"
 version = "0.1.0"
 
 [dependencies]
-afire = {git = "https://github.com/Basicprogrammer10/afire.git", branch = "dev", features = ["extensions", "tracing"]}
+afire = {version = "1.2.0", features = ["extensions", "tracing"]}
 parking_lot = "0.12.1"
 rusqlite = {version = "0.27.0", features = ["bundled", "blob"]}
 semver = "1.0.10"

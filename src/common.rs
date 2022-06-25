@@ -59,7 +59,6 @@ pub fn verify_access<'b>(req: &Request, access: Option<String>) -> Result<(), &'
                 Some(i) => decode_url(i),
                 None => return Err("No Access Code"),
             };
-            dbg!(&access_attempt);
 
             if access_attempt != access {
                 return Err("Invalid Access Code");
